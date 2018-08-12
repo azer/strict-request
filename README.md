@@ -3,7 +3,7 @@
 Send HTTP requests with strict options, such as;
 
 * Timeout
-* Maximum content size (stops the request if size exceeds, without failing)
+* Maximum content size (first given MBs)
 * No redirects (Can be enabled back with `AllowRedirects` option)
 
 ## Example
