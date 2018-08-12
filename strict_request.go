@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"time"
 )
 
 type Options struct {
-	AllowRedirects bool
-	Body           io.Reader
-	BodyBytes      []byte
-	Headers        map[string]string
-	MaxSizeMb      float32
-	TimeoutMs      int
+	AllowRedirects      bool
+	AllowHTTPSRedirects bool
+	Body                io.Reader
+	BodyBytes           []byte
+	Headers             map[string]string
+	MaxSizeMb           float32
+	TimeoutMs           int
 }
 
 func StrictRequest(method, url string, options Options) (*http.Response, error) {
@@ -45,7 +47,13 @@ func StrictRequest(method, url string, options Options) (*http.Response, error) 
 	}
 
 	if !options.AllowRedirects {
-		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		client.CheckRedirect = func(redirect *http.Request, via []*http.Request) error {
+			if options.AllowHTTPSRedirects &&
+				IsSameURLDifferentScheme(redirect.URL.String(), req.URL.String()) &&
+				req.URL.Scheme == "http" && redirect.URL.Scheme == "https" {
+				return nil
+			}
+
 			return http.ErrUseLastResponse
 		}
 	}
@@ -67,4 +75,9 @@ func Put(url string, options Options) (*http.Response, error) {
 
 func Delete(url string, options Options) (*http.Response, error) {
 	return StrictRequest("DELETE", url, options)
+}
+
+func IsSameURLDifferentScheme(a, b string) bool {
+	r, _ := regexp.Compile(`^\w+\:\/\/`)
+	return r.ReplaceAllString(a, "://") == r.ReplaceAllString(b, "://")
 }

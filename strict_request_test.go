@@ -159,3 +159,9 @@ func TestMaxSize(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, string(body), "<!DOCTYPE html>")
 }
+
+func TestIsSameURLDifferentScheme(t *testing.T) {
+	assert.True(t, strictrequest.IsSameURLDifferentScheme("http://wikipedia.org", "https://wikipedia.org"))
+	assert.True(t, strictrequest.IsSameURLDifferentScheme("https://wikipedia.org", "http://wikipedia.org"))
+	assert.False(t, strictrequest.IsSameURLDifferentScheme("http://wikipedia..org", "http://wikipedia.org"))
+}
