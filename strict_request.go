@@ -79,5 +79,13 @@ func Delete(url string, options Options) (*http.Response, error) {
 
 func IsSameURLDifferentScheme(a, b string) bool {
 	r, _ := regexp.Compile(`^\w+\:\/\/`)
-	return r.ReplaceAllString(a, "://") == r.ReplaceAllString(b, "://")
+	a = r.ReplaceAllString(a, "://")
+	b = r.ReplaceAllString(b, "://")
+
+	// Remove the last /
+	r, _ = regexp.Compile(`/$`)
+	a = r.ReplaceAllString(a, "")
+	b = r.ReplaceAllString(b, "")
+
+	return a == b
 }

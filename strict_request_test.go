@@ -141,6 +141,19 @@ func TestAllowingRedirections(t *testing.T) {
 	assert.Equal(t, "ok\n", string(body))
 }
 
+func TestAllowingHTTPSRedirections(t *testing.T) {
+	resp, err := strictrequest.StrictRequest("GET", "http://azer.bike", strictrequest.Options{
+		AllowHTTPSRedirects: true,
+	})
+
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+
+	_, err = ioutil.ReadAll(resp.Body)
+
+	assert.Nil(t, err)
+}
+
 func TestMaxSize(t *testing.T) {
 	testServer := CreateTestServer(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "ok")
@@ -148,8 +161,9 @@ func TestMaxSize(t *testing.T) {
 
 	defer testServer.Close()
 
-	resp, err := strictrequest.StrictRequest("GET", "http://azer.bike", strictrequest.Options{
-		MaxSizeMb: 0.000014,
+	resp, err := strictrequest.StrictRequest("GET", "https://azer.bike", strictrequest.Options{
+		AllowHTTPSRedirects: true,
+		MaxSizeMb:           0.000014,
 	})
 
 	assert.Nil(t, err)
