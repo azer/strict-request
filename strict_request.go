@@ -82,6 +82,11 @@ func IsSameURLDifferentScheme(a, b string) bool {
 	a = r.ReplaceAllString(a, "://")
 	b = r.ReplaceAllString(b, "://")
 
+	// Remove www.
+	r, _ = regexp.Compile(`^\:\/\/www\.`)
+	a = r.ReplaceAllString(a, "://")
+	b = r.ReplaceAllString(b, "://")
+
 	// Remove the last /
 	r, _ = regexp.Compile(`/$`)
 	a = r.ReplaceAllString(a, "")
