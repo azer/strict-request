@@ -12,6 +12,7 @@ import (
 type Options struct {
 	AllowRedirects      bool
 	AllowHTTPSRedirects bool
+	AllowWWWRedirects   bool
 	Body                io.Reader
 	BodyBytes           []byte
 	Headers             map[string]string
@@ -49,8 +50,12 @@ func StrictRequest(method, url string, options Options) (*http.Response, error) 
 	if !options.AllowRedirects {
 		client.CheckRedirect = func(redirect *http.Request, via []*http.Request) error {
 			if options.AllowHTTPSRedirects &&
-				IsSameURLDifferentScheme(redirect.URL.String(), req.URL.String()) &&
+				IsIdenticalURL(redirect.URL.String(), req.URL.String()) &&
 				req.URL.Scheme == "http" && redirect.URL.Scheme == "https" {
+				return nil
+			}
+
+			if options.AllowWWWRedirects && IsIdenticalURL(redirect.URL.String(), req.URL.String()) {
 				return nil
 			}
 
@@ -77,12 +82,11 @@ func Delete(url string, options Options) (*http.Response, error) {
 	return StrictRequest("DELETE", url, options)
 }
 
-func IsSameURLDifferentScheme(a, b string) bool {
+func IsIdenticalURL(a, b string) bool {
 	r, _ := regexp.Compile(`^\w+\:\/\/`)
 	a = r.ReplaceAllString(a, "://")
 	b = r.ReplaceAllString(b, "://")
 
-	// Remove www.
 	r, _ = regexp.Compile(`^\:\/\/www\.`)
 	a = r.ReplaceAllString(a, "://")
 	b = r.ReplaceAllString(b, "://")

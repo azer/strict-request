@@ -142,8 +142,21 @@ func TestAllowingRedirections(t *testing.T) {
 }
 
 func TestAllowingHTTPSRedirections(t *testing.T) {
-	resp, err := strictrequest.StrictRequest("GET", "http://youtube.com/watch?v=xuCn8ux2gbs", strictrequest.Options{
+	resp, err := strictrequest.StrictRequest("GET", "http://www.youtube.com/watch?v=RVKh67M4usc", strictrequest.Options{
 		AllowHTTPSRedirects: true,
+	})
+
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+
+	_, err = ioutil.ReadAll(resp.Body)
+
+	assert.Nil(t, err)
+}
+
+func TestAllowingWWWRedirections(t *testing.T) {
+	resp, err := strictrequest.StrictRequest("GET", "http://bogarde.fr", strictrequest.Options{
+		AllowWWWRedirects: true,
 	})
 
 	assert.Nil(t, err)
@@ -174,16 +187,16 @@ func TestMaxSize(t *testing.T) {
 	assert.Equal(t, string(body), "<!DOCTYPE html>")
 }
 
-func TestIsSameURLDifferentScheme(t *testing.T) {
-	assert.True(t, strictrequest.IsSameURLDifferentScheme("http://wikipedia.org", "https://wikipedia.org"))
-	assert.True(t, strictrequest.IsSameURLDifferentScheme("https://wikipedia.org", "http://wikipedia.org"))
-	assert.False(t, strictrequest.IsSameURLDifferentScheme("http://wikipedia..org", "http://wikipedia.org"))
-	assert.True(t, strictrequest.IsSameURLDifferentScheme("https://wikipedia.org/", "http://wikipedia.org"))
-	assert.True(t, strictrequest.IsSameURLDifferentScheme("https://wikipedia.org", "http://wikipedia.org/"))
-	assert.True(t, strictrequest.IsSameURLDifferentScheme("https://wikipedia.org/", "http://wikipedia.org/"))
-	assert.True(t, strictrequest.IsSameURLDifferentScheme("https://www.wikipedia.org/", "http://wikipedia.org"))
-	assert.True(t, strictrequest.IsSameURLDifferentScheme("https://wikipedia.org", "http://www.wikipedia.org/"))
-	assert.True(t, strictrequest.IsSameURLDifferentScheme("https://www.wikipedia.org/", "http://www.wikipedia.org/"))
-	assert.False(t, strictrequest.IsSameURLDifferentScheme("http://ww.wikipedia.org", "http://wikipedia.org"))
-	assert.False(t, strictrequest.IsSameURLDifferentScheme("http://wikipedia.org/www.", "http://wikipedia.org/"))
+func TestIsIdenticalURL(t *testing.T) {
+	assert.True(t, strictrequest.IsIdenticalURL("http://wikipedia.org", "https://wikipedia.org"))
+	assert.True(t, strictrequest.IsIdenticalURL("https://wikipedia.org", "http://wikipedia.org"))
+	assert.False(t, strictrequest.IsIdenticalURL("http://wikipedia..org", "http://wikipedia.org"))
+	assert.True(t, strictrequest.IsIdenticalURL("https://wikipedia.org/", "http://wikipedia.org"))
+	assert.True(t, strictrequest.IsIdenticalURL("https://wikipedia.org", "http://wikipedia.org/"))
+	assert.True(t, strictrequest.IsIdenticalURL("https://wikipedia.org/", "http://wikipedia.org/"))
+	assert.True(t, strictrequest.IsIdenticalURL("https://www.wikipedia.org/", "http://wikipedia.org"))
+	assert.True(t, strictrequest.IsIdenticalURL("https://wikipedia.org", "http://www.wikipedia.org/"))
+	assert.True(t, strictrequest.IsIdenticalURL("https://www.wikipedia.org/", "http://www.wikipedia.org/"))
+	assert.False(t, strictrequest.IsIdenticalURL("http://ww.wikipedia.org", "http://wikipedia.org"))
+	assert.False(t, strictrequest.IsIdenticalURL("http://wikipedia.org/www.", "http://wikipedia.org/"))
 }
